@@ -108,3 +108,33 @@ CREATE_ARTIST_SPEC = {
         '500': {'description': 'Internal server error'}
     }
 }
+
+
+CREATE_TRACK_SPEC = {
+    'summary': 'Create a new track',
+    'parameters': [
+        {
+            'name': 'body',
+            'in': 'body',
+            'required': True,
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'title': {'type': 'string', 'description': 'Track title', 'example': 'Серый свет'},
+                    'duration': {'type': 'integer', 'description': 'Duration in seconds', 'example': 222},
+                    'file_path': {'type': 'string', 'description': 'Path to audio file', 'example': 'music/gloom_seryy.mp3'},
+                    'album_id': {'type': 'integer', 'description': 'Album ID', 'example': 3},
+                    'artist_id': {'type': 'integer', 'description': 'Artist ID', 'example': 2},
+                    'genre_id': {'type': 'integer', 'description': 'Genre ID', 'example': 4}
+                },
+                'required': ['title', 'duration', 'file_path', 'album_id', 'artist_id', 'genre_id']
+            }
+        }
+    ],
+    'responses': {
+        '201': {'description': 'Track created successfully'},
+        '400': {'description': 'Invalid input or type error'},
+        '404': {'description': 'Referenced album, artist, or genre not found'},
+        '500': {'description': 'Internal server error'}
+    }
+}

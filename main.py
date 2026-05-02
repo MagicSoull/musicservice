@@ -3,7 +3,7 @@ from flasgger import Swagger, swag_from
 from config import host, user, password, db_name
 import psycopg2
 from psycopg2 import IntegrityError 
-from specification import DELETE_ARTIST_SPEC, GET_ARTIST_SPEC, CREATE_ARTIST_SPEC, UPDATE_ARTIST_SPEC
+from specification import DELETE_ARTIST_SPEC, GET_ARTIST_SPEC, CREATE_ARTIST_SPEC, UPDATE_ARTIST_SPEC, CREATE_TRACK_SPEC
 
 app = Flask(__name__)
 swagger = Swagger(app)
@@ -179,6 +179,121 @@ def create_artist():
         }), 500
     finally:
         conn.close()
+        
+@app.route('/track', methods=['POST'])
+@swag_from(CREATE_TRACK_SPEC)
+def create_new_track():
+    
+    conn = get_connection()
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'error': 'Тело запроса не может быть пустым'}), 400
+    
+    required_fields = ['title', 'duration', 'file_path', 'album_id', 'artist_id', 'genre_id']
+    
+    for field in required_fields:
+        if field not in data:
+            return jsonify({'error': f"Поле '{field}' обязательно"}), 400
+    
+    try:
+        title = str(data['title']).strip()
+        duration = int(data['duration'])
+        file_path = str(data['file_path']).strip()
+        album_id = int(data['album_id'])
+        artist_id = int(data['artist_id'])
+        genre_id = int(data['genre_id'])
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Поля duration, album_id, artist_id и genre_id должны быть целыми числами'}), 400
+
+    if not title or len(title) > 100:
+        return jsonify({'error': 'Название трека должно быть от 1 до 100 символов'}), 400
+    if duration <= 60:
+        return jsonify({'error': 'Длительность должна быть положительной не меньше 60'}), 400
+    if len(file_path) > 255:
+        return jsonify({'error': 'Путь к файлу не должен превышать 255 символов'}), 400
+        
+    try:
+          
+        with conn.cursor() as cursor:
+            
+            cursor.execute(
+                "SELECT tracks_id FROM tracks WHERE album_id = %s AND title = %s;",
+                (album_id, title)
+            )
+            if cursor.fetchone():
+                return jsonify({
+                    'error': f'В альбоме с ID {album_id} уже есть трек с названием "{title}"',
+                    'code': 'DUPLICATE_TRACK_TITLE'
+                }), 409
+                
+            cursor.execute(
+                "SELECT tracks_id FROM tracks WHERE file_path = %s;",
+                (file_path,)
+            )
+            if cursor.fetchone():
+                return jsonify({
+                    'error': f'Файл "{file_path}" уже используется в другом треке',
+                    'code': 'DUPLICATE_FILE_PATH'
+                }), 409
+            
+            cursor.execute("SELECT 1 FROM albums WHERE albums_id = %s;", (album_id,))
+            if not cursor.fetchone():
+                return jsonify({'error': f'Альбом с ID {album_id} не найден'}), 404
+        
+            cursor.execute("SELECT 1 FROM artists WHERE artist_id = %s;", (artist_id,))
+            if not cursor.fetchone():
+                    return jsonify({'error': f'Артист с ID {artist_id} не найден'}), 404
+
+            cursor.execute("SELECT 1 FROM genres WHERE genres_id = %s;", (genre_id,))
+            if not cursor.fetchone():
+                    return jsonify({'error': f'Жанр с ID {genre_id} не найден'}), 40
+        
+        
+            cursor.execute(
+                    """INSERT INTO tracks (title, duration, file_path, album_id, artist_id, genre_id)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    RETURNING tracks_id;""",
+                (   title, duration, file_path, album_id, artist_id, genre_id)
+                )
+        
+            new_track_id = cursor.fetchone()[0]
+    
+        conn.commit()
+    
+        return jsonify({
+                'message': 'Трек успешно создан',
+                'tracks_id': new_track_id,
+                'title': title
+            }), 201
+        
+    except IntegrityError as e:
+        conn.rollback()
+        error_str = str(e)
+        
+        # Определяем, какое ограничение нарушено
+        if 'unique_track_title_per_album' in error_str:
+            return jsonify({
+                'error': f'В альбоме уже есть трек с названием "{title}"',
+                'code': 'DUPLICATE_TRACK_TITLE'
+            }), 409
+        elif 'unique_file_path' in error_str:
+            return jsonify({
+                'error': f'Файл "{file_path}" уже используется',
+                'code': 'DUPLICATE_FILE_PATH'
+            }), 409
+        else:
+            return jsonify({
+                'error': 'Нарушение целостности данных',
+                'code': 'INTEGRITY_ERROR'
+            }), 409
+            
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': f'Ошибка сервера: {str(e)}'}), 500
+    finally:
+        conn.close()
+        
         
 if __name__ == "__main__":
     app.run(debug=True)
