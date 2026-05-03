@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Новый пользователь — SoundDB{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <h1>Новый пользователь</h1>
+    <a href="{{ url_for('users') }}" class="btn btn--ghost">← Назад</a>
+</div>
+
+<div class="form-wrap">
+    <form method="post">
+        <div class="form-group">
+            <label>Имя пользователя *</label>
+            <input type="text" name="username" required maxlength="20" placeholder="например: music_fan">
+            <div class="form-note">Максимум 20 символов, должно быть уникальным</div>
+        </div>
+        <div class="form-group">
+            <label>Email *</label>
+            <input type="email" name="email" required maxlength="30" placeholder="user@example.com">
+            <div class="form-note">Максимум 30 символов</div>
+        </div>
+        <div class="form-group">
+            <label>Пароль *</label>
+            <input type="password" name="password" required maxlength="60">
+        </div>
+        <div class="form-group">
+            <label>Роль *</label>
+            <select name="role_id" id="role_select" required>
+                <option value="">— Выберите роль —</option>
+                {% for r in roles %}
+                <option value="{{ r.role_id }}">{{ r.name }}</option>
+                {% endfor %}
+            </select>
+            <div class="form-note">
+                пользователь — слушатель · артист — исполнитель · модератор — модератор · администратор — администратор
+            </div>
+        </div>
+
+        <div id="artist_fields" style="display: none;">
+            <div class="form-group">
+                <label>Страна *</label>
+                <select name="country">
+                    <option value="">— Выберите страну —</option>
+                    <option value="Россия">Россия</option>
+                    <option value="Беларусь">Беларусь</option>
+                    <option value="Украина">Украина</option>
+                    <option value="Казахстан">Казахстан</option>
+                    <option value="США">США</option>
+                    <option value="Великобритания">Великобритания</option>
+                    <option value="Германия">Германия</option>
+                    <option value="Франция">Франция</option>
+                    <option value="Япония">Япония</option>
+                    <option value="Южная Корея">Южная Корея</option>
+                    <option value="Другая">Другая</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Биография</label>
+                <textarea name="bio" maxlength="300" placeholder="Краткое описание артиста..."></textarea>
+                <div class="form-note">Максимум 300 символов</div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn--primary">Создать пользователя</button>
+            <a href="{{ url_for('users') }}" class="btn btn--ghost">Отмена</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    const roleSelect = document.getElementById('role_select');
+    const artistFields = document.getElementById('artist_fields');
+
+    roleSelect.addEventListener('change', function() {
+        const selectedText = this.options[this.selectedIndex].text;
+        if (selectedText === 'artist') {
+            artistFields.style.display = 'block';
+        } else {
+            artistFields.style.display = 'none';
+        }
+    });
+</script>
+
+{% endblock %}

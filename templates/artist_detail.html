@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}{{ artist.name }} — SoundDB{% endblock %}
+{% block content %}
+
+<div class="detail-header">
+    <a href="{{ url_for('artists') }}" class="detail-header__back">← Все артисты</a>
+    <h1>{{ artist.name }}</h1>
+    <div class="detail-header__meta">
+        <span>{{ artist.country }}</span>
+        {% if artist.bio %}<span>{{ artist.bio }}</span>{% endif %}
+    </div>
+    <div class="detail-header__actions">
+        <a href="{{ url_for('artist_edit', artist_id=artist.artist_id) }}" class="btn btn--primary">Редактировать</a>
+        <form method="post" action="{{ url_for('artist_delete', artist_id=artist.artist_id) }}"
+              onsubmit="return confirm('Удалить артиста «{{ artist.name }}»? Все его треки и альбомы будут удалены.')">
+            <button type="submit" class="btn btn--danger">Удалить</button>
+        </form>
+    </div>
+</div>
+
+<div class="section-block">
+    <div class="section-title">Альбомы ({{ albums|length }})</div>
+    {% if albums %}
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Название</th><th>Дата выхода</th><th>Треков</th></tr></thead>
+            <tbody>
+                {% for al in albums %}
+                <tr>
+                    <td><a href="{{ url_for('det_albums', albums_id=al.albums_id) }}"
+                       style="color: var(--text); text-decoration: none;">
+                        {{ al.title }}
+                        </a>
+                    </td>
+                    <td class="td-mono">{{ al.release_date.strftime('%d.%m.%Y') if al.release_date else '—' }}</td>
+                    <td class="td-mono">{{ al.track_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty">Нет альбомов</div>
+    {% endif %}
+</div>
+
+<div class="section-block">
+    <div class="section-title">Треки ({{ tracks|length }})</div>
+    {% if tracks %}
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Трек</th><th>Альбом</th><th>Жанр</th><th>Длительность</th></tr></thead>
+            <tbody>
+                {% for t in tracks %}
+                <tr>
+                    <td>{{ t.title }}</td>
+                    <td class="td-mono">{{ t.album }}</td>
+                    <td><span class="td-tag">{{ t.genre }}</span></td>
+                    <td class="duration">{{ '%d:%02d'|format(t.duration // 60, t.duration % 60) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty">Нет треков</div>
+    {% endif %}
+</div>
+
+{% endblock %}

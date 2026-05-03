@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Пользователи — SoundDB{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Пользователи</h1>
+        <span class="count">{{ users|length }} записей</span>
+    </div>
+    <a href="{{ url_for('user_new') }}" class="btn btn--primary">+ Добавить</a>
+</div>
+
+{% if users %}
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Имя пользователя</th>
+                <th>Email</th>
+                <th>Роли</th>
+                <th>Дата регистрации</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td class="td-mono">{{ u.user_id }}</td>
+                <td>{{ u.username }}</td>
+                <td class="td-mono">{{ u.email }}</td>
+                <td>
+                    {% if u.roles %}
+                        {% for role in u.roles.split(', ') %}
+                        <span class="td-tag">{{ role }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span style="color: var(--text-dim)">—</span>
+                    {% endif %}
+                </td>
+                <td class="td-mono">{{ u.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                <td>
+                    <form method="post" action="{{ url_for('user_delete', user_id=u.user_id) }}"
+                          onsubmit="return confirm('Удалить пользователя «{{ u.username }}»? Все его данные будут удалены.')">
+                        <button type="submit" class="btn btn--danger btn--sm">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty">Пользователи не найдены</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Редактировать артиста' if action == 'edit' else 'Новый артист' }} — SoundDB{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>{{ 'Редактировать' if action == 'edit' else 'Новый артист' }}</h1>
+    </div>
+    <a href="{{ url_for('artists') }}" class="btn btn--ghost">← Назад</a>
+</div>
+
+<div class="form-wrap">
+    <form method="post">
+        <div class="form-group">
+            <label>Имя артиста *</label>
+            <input type="text" name="name" value="{{ artist.name if artist else '' }}" required maxlength="50">
+        </div>
+        <div class="form-group">
+            <label>Страна *</label>
+            <input type="text" name="country" value="{{ artist.country if artist else '' }}" required maxlength="50">
+        </div>
+        <div class="form-group">
+            <label>Биография</label>
+            <textarea name="bio" maxlength="300">{{ artist.bio if artist else '' }}</textarea>
+            <div class="form-note">Максимум 300 символов</div>
+        </div>
+        {% if action == 'create' %}
+        <div class="form-group">
+            <label>ID пользователя *</label>
+            <input type="number" name="user_id" required min="1">
+            <div class="form-note">Пользователь, которому принадлежит профиль</div>
+        </div>
+        {% endif %}
+        <div class="form-actions">
+            <button type="submit" class="btn btn--primary">
+                {{ 'Сохранить' if action == 'edit' else 'Создать' }}
+            </button>
+            <a href="{{ url_for('artists') }}" class="btn btn--ghost">Отмена</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

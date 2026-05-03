@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Артисты — SoundDB{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Артисты</h1>
+        <span class="count">{{ artists|length }} записей</span>
+    </div>
+    <a href="{{ url_for('artist_new') }}" class="btn btn--primary">+ Добавить</a>
+</div>
+
+{% if artists %}
+<div class="cards">
+    {% for a in artists %}
+    <div class="card">
+        <div class="card__label">{{ a.country }}</div>
+        <div class="card__title">{{ a.name }}</div>
+        <div class="card__sub">{{ a.bio[:80] ~ '…' if a.bio and a.bio|length > 80 else (a.bio or '—') }}</div>
+        <div class="card__meta">
+            {{ a.album_count }} альб. · {{ a.track_count }} треков
+        </div>
+        <div class="card__actions">
+            <a href="{{ url_for('artist_detail', artist_id=a.artist_id) }}" class="btn btn--ghost btn--sm">Открыть</a>
+            <a href="{{ url_for('artist_edit', artist_id=a.artist_id) }}" class="btn btn--ghost btn--sm">Изменить</a>
+            <form method="post" action="{{ url_for('artist_delete', artist_id=a.artist_id) }}"
+                  onsubmit="return confirm('Удалить артиста «{{ a.name }}»?')">
+                <button type="submit" class="btn btn--danger btn--sm">Удалить</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty">Артисты не найдены</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}{{ album.title if album else 'Альбом' }} — SoundDB{% endblock %}
+{% block content %}
+
+<div class="detail-header">
+    <a href="{{ url_for('albums') }}" class="detail-header__back">← Все альбомы</a>
+    <div>
+        <h1>{{ album.title }}</h1>
+    </div>
+    <a href="{{ url_for('track_new', album_id=album.albums_id) }}" class="btn btn--primary">+ Добавить</a>
+
+    <div class="detail-header__meta">
+        <span>{{ album.release_date.strftime('%d.%m.%Y') if album.release_date else '—' }}</span>
+        <span>{{ tracks|length }} треков</span>
+    </div>
+</div>
+
+{% if tracks %}
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Артист</th>
+                <th>Жанр</th>
+                <th>Длит.</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in tracks %}
+            <tr>
+                <td>{{ t.title }}</td>
+                <td class="td-mono">{{ t.artist }}</td>
+                <td><span class="td-tag">{{ t.genre }}</span></td>
+                <td class="duration">{{ '%d:%02d'|format(t.duration // 60, t.duration % 60) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty">В этом альбоме нет треков</div>
+{% endif %}
+
+{% endblock %}

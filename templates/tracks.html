@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Треки — SoundDB{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Треки</h1>
+        <span class="count">{{ tracks|length }} записей</span>
+    </div>
+    <a href="{{ url_for('track_new') }}" class="btn btn--primary">+ Добавить</a>
+</div>
+
+{% if tracks %}
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Артист</th>
+                <th>Альбом</th>
+                <th>Жанр</th>
+                <th>Длит.</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in tracks %}
+            <tr>
+                <td>{{ t.title }}</td>
+                <td class="td-mono">{{ t.artist }}</td>
+                <td class="td-mono">{{ t.album }}</td>
+                <td><span class="td-tag">{{ t.genre }}</span></td>
+                <td class="duration">{{ '%d:%02d'|format(t.duration // 60, t.duration % 60) }}</td>
+                <td>
+                    <div class="td-actions">
+                        <form method="post" action="{{ url_for('track_delete', track_id=t.tracks_id) }}"
+                              onsubmit="return confirm('Удалить трек «{{ t.title }}»?')">
+                            <button type="submit" class="btn btn--danger btn--sm">Удалить</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty">Треки не найдены</div>
+{% endif %}
+
+{% endblock %}

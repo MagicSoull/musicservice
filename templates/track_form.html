@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Новый трек — SoundDB{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <h1>Новый трек</h1>
+    <a href="{{ url_for('tracks') }}" class="btn btn--ghost">← Назад</a>
+</div>
+
+<div class="form-wrap">
+    <form method="post">
+        <div class="form-group">
+            <label>Название *</label>
+            <input type="text" name="title" required maxlength="25">
+        </div>
+        <div class="form-group">
+            <label>Длительность (секунды) *</label>
+            <input type="number" name="duration" required min="61">
+            <div class="form-note">Минимум 61 секунда</div>
+        </div>
+        <div class="form-group">
+            <label>Артист *</label>
+            <select name="artist_id" required>
+                <option value="">— Выберите артиста —</option>
+                {% for a in artists %}
+                <option value="{{ a.artist_id }}">{{ a.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Альбом *</label>
+            <select name="album_id" required>
+                <option value="">— Выберите альбом —</option>
+                {% for al in albums %}
+                <option value="{{ al.albums_id }}" {{ 'selected' if album_id and al.albums_id == album_id|int else '' }}>
+                    {{ al.title }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Жанр *</label>
+            <select name="genre_id" required>
+                <option value="">— Выберите жанр —</option>
+                {% for g in genres %}
+                <option value="{{ g.genres_id }}">{{ g.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn--primary">Создать трек</button>
+            <a href="{{ url_for('tracks') }}" class="btn btn--ghost">Отмена</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

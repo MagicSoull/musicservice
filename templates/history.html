@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}История прослушиваний — SoundDB{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>История</h1>
+        <span class="count">{{ history|length }} записей</span>
+    </div>
+</div>
+
+{% if history %}
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Пользователь</th>
+                <th>Трек</th>
+                <th>Артист</th>
+                <th>Дата и время</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for h in history %}
+            <tr>
+                <td class="td-mono">{{ h.username }}</td>
+                <td>{{ h.track }}</td>
+                <td class="td-mono">{{ h.artist }}</td>
+                <td class="td-mono">{{ h.listened_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                <td>
+                    <form method="post" action="{{ url_for('history_delete', entry_id=h.listening_history_id) }}"
+                          onsubmit="return confirm('Удалить запись?')">
+                        <button type="submit" class="btn btn--danger btn--sm">✕</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty">История прослушиваний пуста</div>
+{% endif %}
+
+{% endblock %}

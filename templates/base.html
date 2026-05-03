@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SoundDB{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="nav">
+        <a href="{{ url_for('index') }}" class="nav__logo">SOUND<span>DB</span></a>
+        <ul class="nav__links">
+            <li><a href="{{ url_for('artists') }}" class="{% if request.endpoint and 'artist' in request.endpoint %}active{% endif %}">Артисты</a></li>
+            <li><a href="{{ url_for('tracks') }}" class="{% if request.endpoint and 'track' in request.endpoint %}active{% endif %}">Треки</a></li>
+            <li><a href="{{ url_for('albums') }}" class="{% if request.endpoint and 'album' in request.endpoint %}active{% endif %}">Альбомы</a></li>
+            <li><a href="{{ url_for('playlists') }}" class="{% if request.endpoint and 'playlist' in request.endpoint %}active{% endif %}">Плейлисты</a></li>
+            <li><a href="{{ url_for('users') }}" class="{% if request.endpoint and 'user' in request.endpoint %}active{% endif %}">Пользователи</a></li>
+        </ul>
+    </nav>
+
+    <main class="main">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flashes">
+            {% for cat, msg in messages %}
+            <div class="flash flash--{{ cat }}">{{ msg }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <span>SoundDB — Music Database</span>
+    </footer>
+</body>
+</html>

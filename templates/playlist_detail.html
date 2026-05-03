@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}{{ playlist.name }} — SoundDB{% endblock %}
+{% block content %}
+
+<div class="detail-header">
+    <a href="{{ url_for('playlists') }}" class="detail-header__back">← Все плейлисты</a>
+    <h1>{{ playlist.name }}</h1>
+    <div class="detail-header__meta">
+        <span>{{ playlist.username }}</span>
+        <span>{{ tracks|length }} треков</span>
+        <span>{{ playlist.created_at.strftime('%d.%m.%Y') }}</span>
+    </div>
+    <div class="detail-header__actions">
+        <form method="post" action="{{ url_for('playlist_delete', playlist_id=playlist.playlist_id) }}"
+              onsubmit="return confirm('Удалить плейлист «{{ playlist.name }}»?')">
+            <button type="submit" class="btn btn--danger">Удалить плейлист</button>
+        </form>
+    </div>
+</div>
+
+<div class="section-block">
+    <div class="section-title">Треки в плейлисте</div>
+    {% if tracks %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Трек</th>
+                    <th>Артист</th>
+                    <th>Жанр</th>
+                    <th>Длит.</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tracks %}
+                <tr>
+                    <td class="td-mono">{{ loop.index }}</td>
+                    <td>{{ t.title }}</td>
+                    <td class="td-mono">{{ t.artist }}</td>
+                    <td><span class="td-tag">{{ t.genre }}</span></td>
+                    <td class="duration">{{ '%d:%02d'|format(t.duration // 60, t.duration % 60) }}</td>
+                    <td>
+                        <form method="post" action="{{ url_for('playlist_remove_track', playlist_id=playlist.playlist_id, pt_id=t.playlist_track_id) }}">
+                            <button type="submit" class="btn btn--danger btn--sm">✕</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty">Плейлист пуст</div>
+    {% endif %}
+</div>
+
+{% if available_tracks %}
+<div class="section-block">
+    <div class="section-title">Добавить трек</div>
+    <form method="post" action="{{ url_for('playlist_add_track', playlist_id=playlist.playlist_id) }}" style="display: flex; gap: 10px; align-items: flex-end;">
+        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <select name="track_id" required>
+                <option value="">— Выберите трек —</option>
+                {% for t in available_tracks %}
+                <option value="{{ t.tracks_id }}">{{ t.artist }} — {{ t.title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn--primary">Добавить</button>
+    </form>
+</div>
+{% endif %}
+
+{% endblock %}

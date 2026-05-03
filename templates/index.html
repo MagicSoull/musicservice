@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}SoundDB — Главная{% endblock %}
+{% block content %}
+
+<div class="hero">
+    <h1>SOUND<span>DB</span></h1>
+    <p>База данных музыкального стримингового сервиса. Управляй артистами, треками, альбомами и плейлистами.</p>
+</div>
+
+<div class="stats">
+    <div class="stat">
+        <div class="stat__num">{{ artists_count }}</div>
+        <div class="stat__label">Артистов</div>
+    </div>
+    <div class="stat">
+        <div class="stat__num">{{ tracks_count }}</div>
+        <div class="stat__label">Треков</div>
+    </div>
+    <div class="stat">
+        <div class="stat__num">{{ albums_count }}</div>
+        <div class="stat__label">Альбомов</div>
+    </div>
+    <div class="stat">
+        <div class="stat__num">{{ playlists_count }}</div>
+        <div class="stat__label">Плейлистов</div>
+    </div>
+</div>
+
+<div class="section-title">Топ треков по прослушиваниям</div>
+{% if top_tracks %}
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Трек</th>
+                <th>Артист</th>
+                <th>Прослушиваний</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% set max_plays = top_tracks[0].plays %}
+            {% for t in top_tracks %}
+            <tr>
+                <td class="rank rank--{{ loop.index }}">{{ loop.index }}</td>
+                <td>{{ t.title }}</td>
+                <td class="td-mono">{{ t.artist }}</td>
+                <td>
+                    <div class="plays-bar">
+                        <div class="plays-bar__fill" style="width: {{ (t.plays / max_plays * 120)|int }}px"></div>
+                        <span class="plays-bar__num">{{ t.plays }}</span>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty">Нет данных о прослушиваниях</div>
+{% endif %}
+
+{% endblock %}
