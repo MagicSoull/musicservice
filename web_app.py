@@ -1,23 +1,22 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from config import host, user, password, database
 
 app = Flask(__name__)
 app.secret_key = 'musicdb_secret'
 
 DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'postgres',
-    'password': 'postgres',
-    'database': 'musicdb'
+    'host': host,
+    'user': user,
+    'password': password,
+    'database': database
 }
 
 def get_conn():
     return psycopg2.connect(**DB_CONFIG)
 
-# ─────────────────────────────────────────────
 # ГЛАВНАЯ
-# ─────────────────────────────────────────────
 @app.route('/')
 def index():
     conn = get_conn()
@@ -48,9 +47,8 @@ def index():
         top_tracks=top_tracks
     )
 
-# ─────────────────────────────────────────────
 # АРТИСТЫ
-# ─────────────────────────────────────────────
+# получение всех артистов
 @app.route('/artists')
 def artists():
     conn = get_conn()
@@ -69,6 +67,7 @@ def artists():
     conn.close()
     return render_template('artists.html', artists=rows)
 
+# переход на артиста по id
 @app.route('/artists/<int:artist_id>')
 def artist_detail(artist_id):
     conn = get_conn()
@@ -102,6 +101,7 @@ def artist_detail(artist_id):
     conn.close()
     return render_template('artist_detail.html', artist=artist, albums=albums, tracks=tracks)
 
+# создание нового артиста
 @app.route('/artists/new', methods=['GET', 'POST'])
 def artist_new():
     if request.method == 'POST':
@@ -131,6 +131,7 @@ def artist_new():
             flash(f'Ошибка: {e}', 'error')
     return render_template('artist_form.html', action='create', artist=None)
 
+# изменение артиста
 @app.route('/artists/<int:artist_id>/edit', methods=['GET', 'POST'])
 def artist_edit(artist_id):
     conn = get_conn()
@@ -166,6 +167,7 @@ def artist_edit(artist_id):
             flash(f'Ошибка: {e}', 'error')
     return render_template('artist_form.html', action='edit', artist=artist)
 
+# удаление артиста
 @app.route('/artists/<int:artist_id>/delete', methods=['POST'])
 def artist_delete(artist_id):
     try:
@@ -179,9 +181,8 @@ def artist_delete(artist_id):
         flash(f'Ошибка: {e}', 'error')
     return redirect(url_for('artists'))
 
-# ─────────────────────────────────────────────
 # ТРЕКИ
-# ─────────────────────────────────────────────
+# получение всех треков
 @app.route('/tracks')
 def tracks():
     conn = get_conn()
@@ -199,6 +200,7 @@ def tracks():
     conn.close()
     return render_template('tracks.html', tracks=rows)
 
+# создание нового трека
 @app.route('/tracks/new', methods=['GET', 'POST'])
 def track_new():
     conn = get_conn()
@@ -244,6 +246,7 @@ def track_new():
 
     return render_template('track_form.html', artists=artists, albums=albums, genres=genres, album_id=album_id)
 
+# удаление трека
 @app.route('/tracks/<int:track_id>/delete', methods=['POST'])
 def track_delete(track_id):
     try:
@@ -257,9 +260,8 @@ def track_delete(track_id):
         flash(f'Ошибка: {e}', 'error')
     return redirect(url_for('tracks'))
 
-# ─────────────────────────────────────────────
 # АЛЬБОМЫ
-# ─────────────────────────────────────────────
+# получение всех альбомов
 @app.route('/albums')
 def albums():
     conn = get_conn()
@@ -277,6 +279,7 @@ def albums():
     conn.close()
     return render_template('albums.html', albums=rows)
 
+# создание нового альбома
 @app.route('/albums/new', methods=['GET', 'POST'])
 def album_new():
     conn = get_conn()
@@ -310,6 +313,7 @@ def album_new():
 
     return render_template('album_form.html', artists=artists)
 
+# удаление альбома
 @app.route('/albums/<int:album_id>/delete', methods=['POST'])
 def album_delete(album_id):
     try:
@@ -323,9 +327,8 @@ def album_delete(album_id):
         flash(f'Ошибка: {e}', 'error')
     return redirect(url_for('albums'))
 
-# ─────────────────────────────────────────────
 # ПЛЕЙЛИСТЫ
-# ─────────────────────────────────────────────
+# получение всех плейлистов
 @app.route('/playlists')
 def playlists():
     conn = get_conn()
@@ -344,6 +347,7 @@ def playlists():
     conn.close()
     return render_template('playlists.html', playlists=rows)
 
+# получение всех плейлистов
 @app.route('/playlists/<int:playlist_id>')
 def playlist_detail(playlist_id):
     conn = get_conn()
@@ -384,6 +388,7 @@ def playlist_detail(playlist_id):
     return render_template('playlist_detail.html',
         playlist=playlist, tracks=tracks, available_tracks=available_tracks)
 
+# создание нового плейлиста
 @app.route('/playlists/new', methods=['GET', 'POST'])
 def playlist_new():
     conn = get_conn()
@@ -417,6 +422,7 @@ def playlist_new():
 
     return render_template('playlist_form.html', users=users)
 
+# добавить трек в плейлист
 @app.route('/playlists/<int:playlist_id>/add_track', methods=['POST'])
 def playlist_add_track(playlist_id):
     track_id = request.form.get('track_id')
@@ -434,6 +440,7 @@ def playlist_add_track(playlist_id):
         flash(f'Ошибка: {e}', 'error')
     return redirect(url_for('playlist_detail', playlist_id=playlist_id))
 
+# удалить трек с плейлиста
 @app.route('/playlists/<int:playlist_id>/remove_track/<int:pt_id>', methods=['POST'])
 def playlist_remove_track(playlist_id, pt_id):
     try:
@@ -461,9 +468,8 @@ def playlist_delete(playlist_id):
     return redirect(url_for('playlists'))
 
 
-# ─────────────────────────────────────────────
 # ПОЛЬЗОВАТЕЛИ
-# ─────────────────────────────────────────────
+# получение всех пользователей
 @app.route('/users')
 def users():
     conn = get_conn()
@@ -481,6 +487,7 @@ def users():
     conn.close()
     return render_template('users.html', users=rows)
 
+# добавление нового пользователя
 @app.route('/users/new', methods=['GET', 'POST'])
 def user_new():
     conn = get_conn()
@@ -535,6 +542,7 @@ def user_new():
 
     return render_template('user_form.html', roles=roles)
 
+# удаление пользователя
 @app.route('/users/<int:user_id>/delete', methods=['POST'])
 def user_delete(user_id):
     try:
@@ -548,6 +556,7 @@ def user_delete(user_id):
         flash(f'Ошибка: {e}', 'error')
     return redirect(url_for('users'))
 
+# получене альбома по id
 @app.route("/albums/<int:albums_id>", methods=["GET"])
 def det_albums(albums_id):
     conn = get_conn()
